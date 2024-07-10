@@ -1,23 +1,25 @@
-import logo from './logo.svg';
+import React, { useEffect, useState } from 'react';
 import './App.css';
 
 function App() {
+
+  const [laps, setLaps] = useState([]);
+
+  const fetchLaps = async () => {
+    const res = await(fetch('https://api.openf1.org/v1/laps?session_key=latest'));
+    console.log(res)
+    const lapData = await res.json();
+    console.log(lapData)
+    setLaps(lapData);
+  }
+  
+  // useEffect(() => {
+  //   fetchLaps();
+  // }, []);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <button onClick={fetchLaps}>get laps</button>
     </div>
   );
 }
