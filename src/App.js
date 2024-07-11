@@ -7,25 +7,60 @@ function App() {
 
   const [selectedDriver1, setSelectedDriver1] = useState('');
   const [driver1Laps, setDriver1Laps] = useState([]);
-  const [laps, setLaps] = useState([]);
+  const [driver1Quali, setDriver1Quali] = useState(null);
+  const [driver1BestLap, setDriver1BestLap] = useState(null);
+  const [raceSessionKey, setRaceSessionKey] = useState(null);
+  const [qualiSessionKey, setQualiSessionKey] = useState(null);
+  const [qLaps, setQLaps] = useState([]);
+  const [rLaps, setRLaps] = useState([])
 
   const handleDriver1Change = (event) => {
     setSelectedDriver1(event.target.value);
   };
 
-  const fetchLaps = async () => {
-    const res = await(fetch('https://api.openf1.org/v1/laps?session_key=latest'));
-    const lapData = await res.json();
-    setLaps(lapData);
+  const getLatestMeeting = async () => {
+    const res = await(fetch('https://api.openf1.org/v1/sessions?meeting_key=latest'))
+    const meeting = await res.json()
+
+    const qualiSession = meeting.find(session => session.session_type === 'Qualifying');
+    const raceSession = meeting.find(session => session.session_type === 'Race');
+
+    if (qualiSession) {
+      const qSessionKey = qualiSession.session_key;
+      setQualiSessionKey(qSessionKey)
+    }
+    if (raceSession) {
+      const rSessionKey = raceSession.session_key;
+      setRaceSessionKey(rSessionKey)
+    }
   }
+  const fetchLaps = async () => {
+    await getLatestMeeting();
+
+    const res1 = await(fetch(`https://api.openf1.org/v1/laps?session_key=${qualiSessionKey}`));
+    const qLapData = await res1.json();
+    setQLaps(qLapData);
+
+    const res2 = await(fetch(`https://api.openf1.org/v1/laps?session_key=${raceSessionKey}`));
+    const rLapData = await res2.json();
+    setRLaps(rLapData);
+
+  }
+  // const fetchLaps = async () => {
+
+  //   const res = await(fetch('https://api.openf1.org/v1/laps?session_key=latest'));
+  //   const lapData = await res.json();
+
+  //   setLaps(lapData);
+  // }
 
   useEffect(() => {
     if (selectedDriver1) {
       const driverNumber = drivers[selectedDriver1]
-      const driverLaps = laps.filter(lap => lap.driver_number === driverNumber);
+      const driverLaps = rLaps.filter(lap => lap.driver_number === driverNumber);
       setDriver1Laps(driverLaps)
     } else { setDriver1Laps([]) }
-  }, [selectedDriver1, laps])
+  }, [selectedDriver1, rLaps])
 
   // useEffect(() => {
   //   fetchLaps();
@@ -47,8 +82,13 @@ function App() {
         </select>
       </div>
 
+
+
+
+      <div>{driver1Quali}</div>
+      <div>{driver1BestLap}</div>
       {/*SHOW LAPS*/}
-      <div>
+      {/* <div>
         <h2>Lap Times for {selectedDriver1}</h2>
         {driver1Laps.length > 0 ? (
           <ul>
@@ -61,7 +101,7 @@ function App() {
         ) : (
           <p>No lap data available for this driver.</p>
         )}
-      </div>
+      </div> */}
     </div>
   );
 }
