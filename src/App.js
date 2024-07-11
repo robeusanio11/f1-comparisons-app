@@ -52,11 +52,11 @@ function App() {
         <h2>Lap Times for {selectedDriver1}</h2>
         {driver1Laps.length > 0 ? (
           <ul>
-            {driver1Laps.map((lap) => (
+            {driver1Laps.map((lap) => lap.lap_duration ? (
               <li key={lap.lap_number}>
                 Lap {lap.lap_number}: {lap.lap_duration} seconds
-              </li>
-            ))}
+              </li> ) : null
+            )}
           </ul>
         ) : (
           <p>No lap data available for this driver.</p>
