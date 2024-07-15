@@ -6,13 +6,10 @@ import './App.css';
 function App() {
 
   const [selectedDriver1, setSelectedDriver1] = useState('');
-  const [driver1QLaps, setDriver1QLaps] = useState([]);
   const [driver1RLaps, setDriver1RLaps] = useState([]);
   const [driver1Quali, setDriver1Quali] = useState(null);
   const [driver1BestLap, setDriver1BestLap] = useState(null);
   const [raceSessionKey, setRaceSessionKey] = useState(null);
-  const [qualiSessionKey, setQualiSessionKey] = useState(null);
-  const [qLaps, setQLaps] = useState([]);
   const [rLaps, setRLaps] = useState([])
 
   const handleDriver1Change = (event) => {
@@ -23,13 +20,8 @@ function App() {
     const res = await(fetch('https://api.openf1.org/v1/sessions?meeting_key=latest'))
     const meeting = await res.json()
 
-    const qualiSession = meeting.find(session => session.session_type === 'Qualifying');
     const raceSession = meeting.find(session => session.session_type === 'Race');
 
-    if (qualiSession) {
-      const qSessionKey = qualiSession.session_key;
-      setQualiSessionKey(qSessionKey)
-    }
     if (raceSession) {
       const rSessionKey = raceSession.session_key;
       setRaceSessionKey(rSessionKey)
@@ -37,10 +29,6 @@ function App() {
   }
   const fetchLaps = async () => {
     await getLatestMeeting();
-
-    const res1 = await(fetch(`https://api.openf1.org/v1/laps?session_key=${qualiSessionKey}`));
-    const qLapData = await res1.json();
-    setQLaps(qLapData);
 
     const res2 = await(fetch(`https://api.openf1.org/v1/laps?session_key=${raceSessionKey}`));
     const rLapData = await res2.json();
@@ -63,23 +51,6 @@ function App() {
     } else { setDriver1RLaps([]) }
   }, [selectedDriver1, rLaps])
 
-  useEffect(() => {
-    if (selectedDriver1) {
-      const driverNumber = drivers[selectedDriver1]
-      const driverQLaps = qLaps.filter(lap => lap.driver_number === driverNumber);
-      setDriver1QLaps(driverQLaps)
-    } else { setDriver1QLaps([]) }
-  }, [selectedDriver1, qLaps])
-
-  useEffect(() => {
-    if (selectedDriver1) {
-      driver1QLaps.forEach((lap) => {
-        if (driver1Quali === null || lap.lap_duration < driver1Quali) {
-          setDriver1Quali(lap.lap_duration)
-        }
-      })
-    }
-  }, [selectedDriver1, driver1QLaps])
   // useEffect(() => {
   //   fetchLaps();
   // }, []);
